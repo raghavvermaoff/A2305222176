@@ -1,0 +1,17 @@
+{
+  "name": "backend_test_submission",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "nanoid": "^5.1.5",
+    "node-fetch": "^3.3.2",
+    "valid-url": "^1.0.9"
+  }
+}
