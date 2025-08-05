@@ -10,13 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Middleware → log every request
-app.use(async (req, res, next) => {
-  await Log("backend", "info", req.method, req.originalUrl);
-  next();
-});
-
-// Redirect handler
+// Redirect handler (NO token needed)
 app.get("/:code", async (req, res) => {
   const code = req.params.code;
   const data = urls[code];
@@ -34,7 +28,35 @@ app.get("/:code", async (req, res) => {
     location: "Unknown",
   });
 
+  await Log("backend", "info", "redirect", `Redirected to ${data.originalUrl}`);
   res.redirect(data.originalUrl);
+});
+
+// Auth middleware (only for /shorturls routes)
+app.use(async (req, res, next) => {
+  if (!req.path.startsWith("/shorturls")) {
+    return next();
+  }
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    await Log(
+      "backend",
+      "error",
+      "auth",
+      "missing or invalid authorization header"
+    );
+    return res.status(401).json({ message: "invalid authorization token" });
+  }
+
+  const token = authHeader.split(" ")[1];
+  if (token !== process.env.ACCESS_TOKEN) {
+    await Log("backend", "error", "auth", "token mismatch");
+    return res.status(401).json({ message: "invalid authorization token" });
+  }
+
+  await Log("backend", "info", req.method, req.originalUrl);
+  next();
 });
 
 // API routes
